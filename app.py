@@ -828,7 +828,7 @@ if tab_maitre is not None:
                                 )
 
                             with c4:
-                               if editable:
+                                if editable:
                                     if st.button("💾 Enregistrer", key=f"gm_save_{target_user_id}_{m['match_id']}"):
                                         upsert_prediction(target_user_id, m["match_id"], ph, pa)
                                         st.success(f"Pronostic enregistré pour {choix_joueur} ✅")
