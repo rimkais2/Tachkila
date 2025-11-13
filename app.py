@@ -446,7 +446,7 @@ with tab_pronos:
                     if st.button("💾 Enregistrer", key=f"save_{m['match_id']}"):
                         upsert_prediction(user_id, m["match_id"], ph, pa)
                         st.success("Pronostic enregistré avec succès 🎉")
-                        st.experimental_rerun()
+                        st.rerun()
                 else:
                     st.info("⛔ Verrouillé (match commencé)")
 
@@ -829,12 +829,12 @@ if tab_maitre is not None:
 
                             with c4:
                                 if editable:
-                                    if st.button("💾 Enregistrer", key=f"gm_save_{target_user_id}_{m['match_id']}"):
-                                        upsert_prediction(target_user_id, m["match_id"], ph, pa)
-                                        st.success(f"Pronostic enregistré pour {choix_joueur} ✅")
+                                    if st.button("💾 Enregistrer", key=f"save_{m['match_id']}"):
+                                        upsert_prediction(user_id, m["match_id"], ph, pa)
+                                        st.success("Pronostic enregistré avec succès 🎉")
                                         st.rerun()
                                 else:
-                                    st.info("⛔ Match verrouillé (coup d’envoi passé)")
+                                    st.info("⛔ Verrouillé (match commencé)")
 
                             if res_known and not editable:
                                 st.caption(
