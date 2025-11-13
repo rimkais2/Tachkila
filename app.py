@@ -346,9 +346,30 @@ can_manage_matches = admin_authenticated or is_game_master
 # -----------------------------
 # TABS
 # -----------------------------
-tab_pronos, tab_classement, tab_admin, tab_admin_players = st.tabs(
-    ["Pronostiquer", "Classement", "Admin matchs", "Admin joueurs"]
-)
+# -----------------------------
+# TABS (créés dynamiquement selon le rôle)
+# -----------------------------
+tab_labels = ["Pronostiquer", "Classement"]
+tab_ids = ["pronos", "classement"]
+
+# Onglet "Maître de jeu" visible pour admin OU maître de jeu
+if can_manage_matches:  # can_manage_matches = admin ou game master
+    tab_labels.append("Maître de jeu")
+    tab_ids.append("maitre")
+
+# Onglet "Admin" visible uniquement pour l'admin
+if admin_authenticated:
+    tab_labels.append("Admin")
+    tab_ids.append("admin")
+
+tabs = st.tabs(tab_labels)
+tab_dict = dict(zip(tab_ids, tabs))
+
+tab_pronos = tab_dict["pronos"]
+tab_classement = tab_dict["classement"]
+tab_maitre = tab_dict.get("maitre")   # peut être None si pas autorisé
+tab_admin = tab_dict.get("admin")     # peut être None si pas admin
+
 
 # -----------------------------
 # TAB PRONOS
@@ -550,21 +571,24 @@ with tab_classement:
 
                 st.dataframe(show, use_container_width=True)
 
-# -----------------------------
-# TAB ADMIN MATCHS
-# -----------------------------
-with tab_admin:
-    st.subheader("Administration des matches")
 
-    if not can_manage_matches:
-        st.info("Réservé à l'administrateur ou aux maîtres de jeu.")
-    else:
-        if admin_authenticated and is_game_master:
-            st.success("Mode admin + maître de jeu actifs")
-        elif admin_authenticated:
-            st.success("Mode admin actif")
-        elif is_game_master:
-            st.success("Mode maître de jeu actif (gestion des matches et pronos des joueurs)")
+# -----------------------------
+# TAB MAÎTRE DE JEU (gestion des matches + pronos des joueurs)
+# -----------------------------
+if tab_maitre is not None:
+    with tab_maitre:
+        st.subheader("Espace maître de jeu")
+
+        if not can_manage_matches:
+            st.info("Réservé à l'administrateur ou aux maîtres de jeu.")
+        else:
+            if admin_authenticated and is_game_master:
+                st.success("Mode admin + maître de jeu actifs")
+            elif admin_authenticated:
+                st.success("Mode admin actif")
+            elif is_game_master:
+                st.success("Mode maître de jeu actif (gestion des matches et pronos des joueurs)")
+
 
         # Ajouter un match
         st.markdown("### Ajouter un match")
@@ -758,10 +782,11 @@ with tab_admin:
                         st.caption(f"Score final : {int(m['final_home'])} - {int(m['final_away'])}")
 
 # -----------------------------
-# TAB ADMIN JOUEURS
+# TAB ADMIN (gestion joueurs & rôles)
 # -----------------------------
-with tab_admin_players:
-    st.subheader("Gestion des joueurs")
+if tab_admin is not None:
+    with tab_admin:
+        st.subheader("Administration des joueurs")
 
     if not admin_authenticated:
         st.info("Réservé à l'administrateur. Active le mode admin dans la barre latérale.")
