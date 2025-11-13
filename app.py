@@ -808,37 +808,33 @@ if tab_maitre is not None:
                             existing = preds_cible[preds_cible["match_id"] == m["match_id"]]
                             ph0 = int(existing.iloc[0]["ph"]) if not existing.empty else 0
                             pa0 = int(existing.iloc[0]["pa"]) if not existing.empty else 0
-
-                            editable = is_editable(m["kickoff_paris"])
+                            
+                            # Pour le maître de jeu : toujours éditable, même si le match a commencé
                             res_known = (pd.notna(m["final_home"]) and pd.notna(m["final_away"]))
-
+                            
                             with c2:
                                 ph = st.number_input(
                                     f"{m['home']} (dom.)",
                                     0, 20, ph0, 1,
                                     key=f"gm_ph_{target_user_id}_{m['match_id']}",
-                                    disabled=not editable
+                                    disabled=False,  # 👈 jamais désactivé pour le maître de jeu
                                 )
                             with c3:
                                 pa = st.number_input(
                                     f"{m['away']} (ext.)",
                                     0, 20, pa0, 1,
                                     key=f"gm_pa_{target_user_id}_{m['match_id']}",
-                                    disabled=not editable
+                                    disabled=False,  # 👈 idem
                                 )
-
+                            
                             with c4:
-                                if editable:
-                                    if st.button("💾 Enregistrer", key=f"gm_save_{target_user_id}_{m['match_id']}"):
-                                        upsert_prediction(target_user_id, m["match_id"], ph, pa)
-                                        st.success(f"Pronostic enregistré pour {choix_joueur} ✅")
-                                else:
-                                    st.info("⛔ Verrouillé (match commencé)")
+                                if st.button("💾 Enregistrer", key=f"gm_save_{target_user_id}_{m['match_id']}"):
+                                    upsert_prediction(target_user_id, m["match_id"], ph, pa)
+                                    st.success(f"Pronostic enregistré pour {choix_joueur} ✅")
+                            
+                            if res_known:
+                                st.caption(f"Score final : {int(m['final_home'])} - {int(m['final_away'])}")
 
-                            if res_known and not editable:
-                                st.caption(
-                                    f"Score final : {int(m['final_home'])} - {int(m['final_away'])}"
-                                )
 
 # -----------------------------
 # TAB ADMIN (gestion joueurs & rôles)
