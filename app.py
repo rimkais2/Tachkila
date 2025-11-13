@@ -261,6 +261,8 @@ def load_catalog():
     return pd.read_csv("teams_catalog.csv")
 
 
+catalog = load_catalog()
+
 def logo_for(team_name):
     """Retourne le lien du logo si disponible."""
     try:
