@@ -443,12 +443,12 @@ with tab_pronos:
                 )
             with c4:
                 if editable:
-                    if st.button("Enregistrer", key=f"save_{m['match_id']}"):
+                    if st.button("💾 Enregistrer", key=f"save_{m['match_id']}"):
                         upsert_prediction(user_id, m["match_id"], ph, pa)
-                        st.success("Pronostic enregistré")
-                        st.rerun()
+                        st.success("Pronostic enregistré avec succès 🎉")
+                        st.experimental_rerun()
                 else:
-                    st.info("Verrouillé (match commencé)")
+                    st.info("⛔ Verrouillé (match commencé)")
 
             if res_known and not editable:
                 st.caption(f"Score final : {int(m['final_home'])} - {int(m['final_away'])}")
