@@ -14,25 +14,20 @@ from sqlalchemy.engine import Engine
 import random
 
 # -----------------------------
-# CONFIG & SESSION STATE
+# CONFIG SIMPLE (plus de collapse_sidebar)
 # -----------------------------
-# Sidebar ouverte avant connexion, repliée après
-sidebar_state = "expanded" if not st.session_state["collapse_sidebar"] else "collapsed"
-
 st.set_page_config(
     page_title="Tachkila Mouchkila",
     page_icon="⚽",
     layout="wide",
-    initial_sidebar_state=sidebar_state,
+    initial_sidebar_state="expanded",  # sidebar ouverte au démarrage
 )
 
-
+# -----------------------------
+# SESSION STATE INIT
+# -----------------------------
 if "player" not in st.session_state:
     st.session_state["player"] = None
-
-if "collapse_sidebar" not in st.session_state:
-    st.session_state["collapse_sidebar"] = False
-
 if "admin_authenticated" not in st.session_state:
     st.session_state["admin_authenticated"] = False
 
