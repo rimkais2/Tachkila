@@ -574,7 +574,7 @@ with tab_classement:
 
 
 # -----------------------------
-# TAB MAÎTRE DE JEU (gestion des matches + pronos des joueurs)
+# TAB MAÎTRE DE JEU
 # -----------------------------
 if tab_maitre is not None:
     with tab_maitre:
@@ -583,26 +583,31 @@ if tab_maitre is not None:
         if not can_manage_matches:
             st.info("Réservé à l'administrateur ou aux maîtres de jeu.")
         else:
+            # Bandeau d'info sur le rôle
             if admin_authenticated and is_game_master:
-                st.success("Mode admin + maître de jeu actifs")
+                st.success("Mode admin + maître de jeu actifs.")
             elif admin_authenticated:
-                st.success("Mode admin actif")
+                st.success("Mode admin actif.")
             elif is_game_master:
-                st.success("Mode maître de jeu actif (gestion des matches et pronos des joueurs)")
+                st.success("Mode maître de jeu actif (gestion des matches et des pronos des joueurs).")
 
-            # --- sous-onglets ---
+            # -------------------------
+            # SOUS-ONGLETS
+            # -------------------------
             tab_ajout, tab_resultats, tab_pronos_joueurs = st.tabs(
                 ["Ajouter un match", "Résultats", "Pronos joueurs"]
             )
 
-            # -------------------------
+            # =====================================================
             # ONGLET 1 : AJOUTER UN MATCH
-            # -------------------------
+            # =====================================================
             with tab_ajout:
-                st.markdown("### Ajouter un match")
-                with st.form("add_match"):
-                    c1, c2, c3, c4 = st.columns([3,3,3,2])
+                st.markdown("### ➕ Ajouter un match")
 
+                with st.form("form_add_match"):
+                    c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
+
+                    # Sélection équipe domicile
                     with c1:
                         home = st.selectbox(
                             "Équipe domicile",
@@ -615,6 +620,7 @@ if tab_maitre is not None:
                             if logo:
                                 st.image(logo, width=64, caption=home)
 
+                    # Sélection équipe extérieur
                     with c2:
                         away = st.selectbox(
                             "Équipe extérieur",
@@ -627,47 +633,59 @@ if tab_maitre is not None:
                             if logo:
                                 st.image(logo, width=64, caption=away)
 
+                    # Date + heure
                     with c3:
                         col_date, col_time = st.columns(2)
                         with col_date:
-                            date_match = st.date_input("Date du match")
+                            date_match = st.date_input("📅 Date du match")
                         with col_time:
-                            heure_match = st.time_input("Heure du match")
+                            heure_match = st.time_input("⏰ Heure du match")
                         kickoff_dt = datetime.combine(date_match, heure_match)
                         kickoff = kickoff_dt.strftime("%Y-%m-%d %H:%M")
 
+                    # Bouton submit
                     with c4:
                         submit = st.form_submit_button("Ajouter")
 
                     if submit:
                         if not home or not away:
                             st.warning("Sélectionne les deux équipes.")
+                        elif home == away:
+                            st.warning("L'équipe domicile et l'équipe extérieur doivent être différentes.")
                         else:
                             add_match(home, away, kickoff)
-                            st.success(f"Match ajouté ({home} vs {away})")
+                            st.success(f"Match ajouté ✅ ({home} vs {away} — {kickoff})")
                             st.rerun()
 
-            # -------------------------
-            # ONGLET 2 : RÉSULTATS (scores + suppression)
-            # -------------------------
+            # =====================================================
+            # ONGLET 2 : RÉSULTATS
+            # =====================================================
             with tab_resultats:
-                st.markdown("### Saisie et modification des résultats")
+                st.markdown("### 📝 Saisie et modification des résultats")
 
                 df_users3, df_matches3, _ = load_df()
                 if df_matches3.empty:
                     st.info("Aucun match pour le moment.")
                 else:
+                    # Tri du plus récent au plus ancien
                     try:
-                        df_matches3["_ko"] = pd.to_datetime(df_matches3["kickoff_paris"], format="%Y-%m-%d %H:%M")
+                        df_matches3["_ko"] = pd.to_datetime(
+                            df_matches3["kickoff_paris"], format="%Y-%m-%d %H:%M"
+                        )
                     except Exception:
                         df_matches3["_ko"] = pd.NaT
-                    df_matches3 = df_matches3.sort_values("_ko", ascending=False, na_position="last").drop(columns=["_ko"])
+
+                    df_matches3 = df_matches3.sort_values(
+                        "_ko", ascending=False, na_position="last"
+                    ).drop(columns=["_ko"])
 
                     for _, m in df_matches3.iterrows():
                         match_id = m["match_id"]
 
                         with st.expander(f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"):
                             c1, c2 = st.columns([3, 2])
+
+                            # Infos générales + logos
                             with c1:
                                 st.markdown(f"**{m['home']} vs {m['away']}**")
                                 st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
@@ -682,14 +700,18 @@ if tab_maitre is not None:
                                     if lg_away:
                                         st.image(lg_away, width=48, caption=m["away"])
 
+                            # Score actuel
                             with c2:
                                 if pd.notna(m["final_home"]) and pd.notna(m["final_away"]):
-                                    st.markdown(f"Score final actuel : {int(m['final_home'])} - {int(m['final_away'])}")
+                                    st.markdown(
+                                        f"**Score final actuel :** {int(m['final_home'])} - {int(m['final_away'])}"
+                                    )
                                 else:
-                                    st.markdown("Score final actuel : non saisi")
+                                    st.markdown("**Score final actuel :** non saisi")
 
                             st.markdown("---")
 
+                            # Zone de saisie du score + actions
                             c3, c4, c5 = st.columns([2, 2, 2])
 
                             default_fh = int(m["final_home"]) if pd.notna(m["final_home"]) else 0
@@ -715,53 +737,65 @@ if tab_maitre is not None:
                                 )
 
                             with c5:
-                                if st.button("Sauvegarder le score", key=f"save_score_{match_id}"):
+                                if st.button("💾 Sauvegarder le score", key=f"save_score_{match_id}"):
                                     set_final_score(match_id, new_fh, new_fa)
-                                    st.success("Score final mis à jour (le classement sera recalculé)")
+                                    st.success("Score final mis à jour ✅ (le classement sera recalculé)")
                                     st.rerun()
 
-                                if st.button("Supprimer ce match", key=f"delete_match_{match_id}"):
+                                if st.button("🗑️ Supprimer ce match", key=f"delete_match_{match_id}"):
                                     delete_match_and_predictions(match_id)
-                                    st.warning("Match supprimé avec ses pronostics associés")
+                                    st.warning("Match supprimé avec ses pronostics associés 🗑️")
                                     st.rerun()
 
-            # -------------------------
-            # ONGLET 3 : PRONOS DES JOUEURS (saisie / correction)
-            # -------------------------
+            # =====================================================
+            # ONGLET 3 : PRONOS DES JOUEURS
+            # =====================================================
             with tab_pronos_joueurs:
-                st.markdown("### Saisir ou corriger les pronostics d'un joueur")
+                st.markdown("### ✍️ Saisir ou corriger les pronostics d'un joueur")
 
+                # Sélection du joueur dont on modifie les pronos
                 joueurs = df_users.sort_values("display_name").reset_index(drop=True)
                 if joueurs.empty:
                     st.info("Aucun joueur.")
                 else:
-                    choix_joueur = st.selectbox("Choisir un joueur :", joueurs["display_name"].tolist())
+                    choix_joueur = st.selectbox(
+                        "Choisir un joueur :",
+                        joueurs["display_name"].tolist(),
+                    )
                     cible = joueurs[joueurs["display_name"] == choix_joueur].iloc[0]
                     target_user_id = cible["user_id"]
 
-                    st.caption(f"Modification des pronostics pour : {choix_joueur}")
+                    st.caption(f"Modification des pronostics pour : **{choix_joueur}**")
 
                     if df_matches.empty:
                         st.info("Aucun match pour le moment.")
                     else:
+                        # Tri du plus récent au plus ancien
                         try:
                             df_matches_gm = df_matches.copy()
-                            df_matches_gm["_ko"] = pd.to_datetime(df_matches_gm["kickoff_paris"], format="%Y-%m-%d %H:%M")
+                            df_matches_gm["_ko"] = pd.to_datetime(
+                                df_matches_gm["kickoff_paris"], format="%Y-%m-%d %H:%M"
+                            )
                         except Exception:
                             df_matches_gm = df_matches.copy()
                             df_matches_gm["_ko"] = pd.NaT
-                        df_matches_gm = df_matches_gm.sort_values("_ko", ascending=False, na_position="last").drop(columns=["_ko"])
+
+                        df_matches_gm = df_matches_gm.sort_values(
+                            "_ko", ascending=False, na_position="last"
+                        ).drop(columns=["_ko"])
 
                         preds_cible = df_preds[df_preds["user_id"] == target_user_id]
 
                         for _, m in df_matches_gm.iterrows():
                             st.markdown("---")
-                            c1, c2, c3, c4 = st.columns([3,3,3,2])
+                            c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
 
+                            # Infos match
                             with c1:
                                 st.markdown(f"**{m['home']} vs {m['away']}**")
                                 st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
 
+                            # Prono existant
                             existing = preds_cible[preds_cible["match_id"] == m["match_id"]]
                             ph0 = int(existing.iloc[0]["ph"]) if not existing.empty else 0
                             pa0 = int(existing.iloc[0]["pa"]) if not existing.empty else 0
@@ -786,208 +820,17 @@ if tab_maitre is not None:
 
                             with c4:
                                 if editable:
-                                    if st.button("Enregistrer", key=f"gm_save_{target_user_id}_{m['match_id']}"):
+                                    if st.button("💾 Enregistrer", key=f"gm_save_{target_user_id}_{m['match_id']}"):
                                         upsert_prediction(target_user_id, m["match_id"], ph, pa)
-                                        st.success(f"Pronostic enregistré pour {choix_joueur}")
+                                        st.success(f"Pronostic enregistré pour {choix_joueur} ✅")
                                         st.rerun()
                                 else:
-                                    st.info("Verrouillé (match commencé)")
+                                    st.info("⛔ Match verrouillé (coup d’envoi passé)")
 
                             if res_known and not editable:
-                                st.caption(f"Score final : {int(m['final_home'])} - {int(m['final_away'])}")
-
-
-
-        # Ajouter un match
-        st.markdown("### Ajouter un match")
-        with st.form("add_match"):
-            c1, c2, c3, c4 = st.columns([3,3,3,2])
-
-            with c1:
-                home = st.selectbox(
-                    "Équipe domicile",
-                    options=catalog["name"].sort_values(),
-                    index=None,
-                    placeholder="Choisir une équipe..."
-                )
-                if home:
-                    logo = logo_for(home)
-                    if logo:
-                        st.image(logo, width=64, caption=home)
-
-            with c2:
-                away = st.selectbox(
-                    "Équipe extérieur",
-                    options=catalog["name"].sort_values(),
-                    index=None,
-                    placeholder="Choisir une équipe..."
-                )
-                if away:
-                    logo = logo_for(away)
-                    if logo:
-                        st.image(logo, width=64, caption=away)
-
-            with c3:
-                col_date, col_time = st.columns(2)
-                with col_date:
-                    date_match = st.date_input("Date du match")
-                with col_time:
-                    heure_match = st.time_input("Heure du match")
-                kickoff_dt = datetime.combine(date_match, heure_match)
-                kickoff = kickoff_dt.strftime("%Y-%m-%d %H:%M")
-
-            with c4:
-                submit = st.form_submit_button("Ajouter")
-
-            if submit:
-                if not home or not away:
-                    st.warning("Sélectionne les deux équipes.")
-                else:
-                    add_match(home, away, kickoff)
-                    st.success(f"Match ajouté ({home} vs {away})")
-                    st.rerun()
-
-        st.markdown("### Matches existants")
-
-        df_users3, df_matches3, _ = load_df()
-        if df_matches3.empty:
-            st.info("Aucun match pour le moment.")
-        else:
-            try:
-                df_matches3["_ko"] = pd.to_datetime(df_matches3["kickoff_paris"], format="%Y-%m-%d %H:%M")
-            except Exception:
-                df_matches3["_ko"] = pd.NaT
-            df_matches3 = df_matches3.sort_values("_ko", ascending=False, na_position="last").drop(columns=["_ko"])
-
-            for _, m in df_matches3.iterrows():
-                match_id = m["match_id"]
-
-                with st.expander(f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"):
-                    c1, c2 = st.columns([3, 2])
-                    with c1:
-                        st.markdown(f"**{m['home']} vs {m['away']}**")
-                        st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
-
-                        lc1, lc2 = st.columns(2)
-                        with lc1:
-                            lg_home = logo_for(m["home"])
-                            if lg_home:
-                                st.image(lg_home, width=48, caption=m["home"])
-                        with lc2:
-                            lg_away = logo_for(m["away"])
-                            if lg_away:
-                                st.image(lg_away, width=48, caption=m["away"])
-
-                    with c2:
-                        if pd.notna(m["final_home"]) and pd.notna(m["final_away"]):
-                            st.markdown(f"Score final actuel : {int(m['final_home'])} - {int(m['final_away'])}")
-                        else:
-                            st.markdown("Score final actuel : non saisi")
-
-                    st.markdown("---")
-
-                    c3, c4, c5 = st.columns([2, 2, 2])
-
-                    default_fh = int(m["final_home"]) if pd.notna(m["final_home"]) else 0
-                    default_fa = int(m["final_away"]) if pd.notna(m["final_away"]) else 0
-
-                    with c3:
-                        new_fh = st.number_input(
-                            f"Score {m['home']}",
-                            min_value=0,
-                            max_value=50,
-                            step=1,
-                            value=default_fh,
-                            key=f"fh_admin_{match_id}"
-                        )
-                    with c4:
-                        new_fa = st.number_input(
-                            f"Score {m['away']}",
-                            min_value=0,
-                            max_value=50,
-                            step=1,
-                            value=default_fa,
-                            key=f"fa_admin_{match_id}"
-                        )
-
-                    with c5:
-                        if st.button("Sauvegarder le score", key=f"save_score_{match_id}"):
-                            set_final_score(match_id, new_fh, new_fa)
-                            st.success("Score final mis à jour (le classement sera recalculé)")
-                            st.rerun()
-
-                        if st.button("Supprimer ce match", key=f"delete_match_{match_id}"):
-                            delete_match_and_predictions(match_id)
-                            st.warning("Match supprimé avec ses pronostics associés")
-                            st.rerun()
-
-        # Saisir / corriger les pronos d'un joueur
-        st.markdown("### Saisir ou corriger les pronostics d'un joueur")
-
-        joueurs = df_users.sort_values("display_name").reset_index(drop=True)
-        if joueurs.empty:
-            st.info("Aucun joueur.")
-        else:
-            choix_joueur = st.selectbox("Choisir un joueur :", joueurs["display_name"].tolist())
-            cible = joueurs[joueurs["display_name"] == choix_joueur].iloc[0]
-            target_user_id = cible["user_id"]
-
-            st.caption(f"Modification des pronostics pour : {choix_joueur}")
-
-            if df_matches.empty:
-                st.info("Aucun match pour le moment.")
-            else:
-                try:
-                    df_matches_gm = df_matches.copy()
-                    df_matches_gm["_ko"] = pd.to_datetime(df_matches_gm["kickoff_paris"], format="%Y-%m-%d %H:%M")
-                except Exception:
-                    df_matches_gm = df_matches.copy()
-                    df_matches_gm["_ko"] = pd.NaT
-                df_matches_gm = df_matches_gm.sort_values("_ko", ascending=False, na_position="last").drop(columns=["_ko"])
-
-                preds_cible = df_preds[df_preds["user_id"] == target_user_id]
-
-                for _, m in df_matches_gm.iterrows():
-                    st.markdown("---")
-                    c1, c2, c3, c4 = st.columns([3,3,3,2])
-
-                    with c1:
-                        st.markdown(f"**{m['home']} vs {m['away']}**")
-                        st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
-
-                    existing = preds_cible[preds_cible["match_id"] == m["match_id"]]
-                    ph0 = int(existing.iloc[0]["ph"]) if not existing.empty else 0
-                    pa0 = int(existing.iloc[0]["pa"]) if not existing.empty else 0
-
-                    editable = is_editable(m["kickoff_paris"])
-                    res_known = (pd.notna(m["final_home"]) and pd.notna(m["final_away"]))
-
-                    with c2:
-                        ph = st.number_input(
-                            f"{m['home']} (dom.)",
-                            0, 20, ph0, 1,
-                            key=f"gm_ph_{target_user_id}_{m['match_id']}",
-                            disabled=not editable
-                        )
-                    with c3:
-                        pa = st.number_input(
-                            f"{m['away']} (ext.)",
-                            0, 20, pa0, 1,
-                            key=f"gm_pa_{target_user_id}_{m['match_id']}",
-                            disabled=not editable
-                        )
-
-                    with c4:
-                        if editable:
-                            if st.button("Enregistrer", key=f"gm_save_{target_user_id}_{m['match_id']}"):
-                                upsert_prediction(target_user_id, m["match_id"], ph, pa)
-                                st.success(f"Pronostic enregistré pour {choix_joueur}")
-                                st.rerun()
-                        else:
-                            st.info("Verrouillé (match commencé)")
-
-                    if res_known and not editable:
-                        st.caption(f"Score final : {int(m['final_home'])} - {int(m['final_away'])}")
+                                st.caption(
+                                    f"Score final : {int(m['final_home'])} - {int(m['final_away'])}"
+                                )
 
 # -----------------------------
 # TAB ADMIN (gestion joueurs & rôles)
