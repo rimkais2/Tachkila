@@ -284,8 +284,36 @@ def logo_for(team_name):
 st.title("⚽ Tachkila Mouchkila")
 
 with st.sidebar:
-    # Connexion joueur
-    st.header("Connexion joueur")
+    # ---- Connexion joueur ----
+    st.markdown("""
+    <div style='padding:10px; border-radius:8px; background:#eef2ff; margin-bottom:10px;'>
+        <span style='font-size:22px;'>👤</span>
+        <span style='font-size:18px; font-weight:600;'> Connexion joueur</span>
+        <br>
+        <span style='font-size:12px; color:#555;'>Entre ton nom et ton code ici.</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.session_state["player"] is None:
+        name_input = st.text_input("Nom du joueur")
+        pin_input = st.text_input("Code à 4 chiffres", type="password", max_chars=4)
+
+        if st.button("Se connecter"):
+            user = authenticate_player(name_input, pin_input)
+            if user is None:
+                st.error("Nom ou code incorrect (demande à l'admin de te créer ou de vérifier ton code).")
+            else:
+                st.session_state["player"] = dict(user)
+                st.session_state["collapse_sidebar"] = True
+                st.rerun()
+    else:
+        player = st.session_state["player"]
+        st.success(f"Connecté : {player['display_name']}")
+        if st.button("Changer de joueur"):
+            st.session_state["player"] = None
+            st.session_state["collapse_sidebar"] = False
+            st.rerun()
+
 
     if st.session_state["player"] is None:
         name_input = st.text_input("Nom du joueur")
