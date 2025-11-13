@@ -15,15 +15,23 @@ import random
 # -----------------------------
 # CONFIG & SESSION STATE
 # -----------------------------
+# Sidebar ouverte avant connexion, repliée après
+sidebar_state = "expanded" if not st.session_state["collapse_sidebar"] else "collapsed"
+
 st.set_page_config(
     page_title="Tachkila Mouchkila",
     page_icon="⚽",
     layout="wide",
-    initial_sidebar_state="expanded",  # sidebar ouverte par défaut
+    initial_sidebar_state=sidebar_state,
 )
+
 
 if "player" not in st.session_state:
     st.session_state["player"] = None
+
+if "collapse_sidebar" not in st.session_state:
+    st.session_state["collapse_sidebar"] = False
+
 if "admin_authenticated" not in st.session_state:
     st.session_state["admin_authenticated"] = False
 
@@ -285,14 +293,15 @@ with st.sidebar:
         name_input = st.text_input("Nom du joueur")
         pin_input = st.text_input("Code à 4 chiffres", type="password", max_chars=4)
 
-        if st.button("Se connecter"):
+       if st.button("Se connecter"):
             user = authenticate_player(name_input, pin_input)
             if user is None:
-                st.error("Nom ou code incorrect (demande à l'admin de te créer ou de vérifier ton code).")
+                st.error("Nom ou code incorrect (demande à l'admin de vérifier ton code).")
             else:
                 st.session_state["player"] = dict(user)
-                st.success(f"Connecté en tant que {user['display_name']}")
+                st.session_state["collapse_sidebar"] = True   # 👈 replie la sidebar
                 st.rerun()
+
     else:
         player = st.session_state["player"]
         st.success(f"Connecté : {player['display_name']}")
