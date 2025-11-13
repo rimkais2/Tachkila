@@ -256,12 +256,10 @@ def set_game_master(user_id: str, is_gm: bool):
         )
     st.cache_data.clear()
 
-@st.cache_data
 def load_catalog():
     """Charge la liste des clubs et sélections depuis le CSV."""
     return pd.read_csv("teams_catalog.csv")
 
-catalog = load_catalog()
 
 def logo_for(team_name):
     """Retourne le lien du logo si disponible."""
