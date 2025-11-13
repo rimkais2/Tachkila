@@ -36,7 +36,7 @@ national-mu,Mauritius,national,Mauritius,MU,CAF,MU,https://flagcdn.com/w320/mu.p
 national-ma,Morocco,national,Morocco,MA,CAF,MA,https://flagcdn.com/w320/ma.png
 national-mz,Mozambique,national,Mozambique,MZ,CAF,MZ,https://flagcdn.com/w320/mz.png
 national-na,Namibia,national,Namibia,,CAF,,https://flagcdn.com/w320/na.png
-test-xx,Testland,national,Testland,XX,TEST,XX,https://flagcdn.com/w320/xx.png
+test-xx,testland,national,testland,XX,TEST,XX,https://flagcdn.com/w320/xx.png
 
 national-ne,Niger,national,Niger,NE,CAF,NE,https://flagcdn.com/w320/ne.png
 national-ng,Nigeria,national,Nigeria,NG,CAF,NG,https://flagcdn.com/w320/ng.png
@@ -101,3 +101,4 @@ club-ma-mat,Moghreb Atlético Tétouan,club,Morocco,MA,CAF,MAT,https://www.trans
 club-ma-mas,MAS Fès,club,Morocco,MA,CAF,MAS,https://www.transfermarkt.com/mas-fes/startseite/verein/3282
 club-ma-ocs,Olympique Safi,club,Morocco,MA,CAF,OCS,https://www.transfermarkt.com/olympique-safi/startseite/verein/22944
 club-ma-husa,Hassania d'Agadir,club,Morocco,MA,CAF,HUSA,https://www.transfermarkt.com/hassania/startseite/verein/22935
+
