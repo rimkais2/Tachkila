@@ -62,6 +62,28 @@ predictions = Table(
 with engine.begin() as conn:
     meta.create_all(conn)
 
+
+def init_first_user():
+    """Crée un premier user par défaut si la table est vide."""
+    with engine.begin() as conn:
+        count = conn.execute(
+            select(func.count()).select_from(users)
+        ).scalar()
+        if count == 0:
+            uid = str(uuid.uuid4())
+            display_name = "Joueur1"
+            pin_code = "0000"
+            conn.execute(
+                insert(users).values(
+                    user_id=uid,
+                    display_name=display_name,
+                    pin_code=pin_code,
+                )
+            )
+
+# Appel immédiat à l'init
+init_first_user()
+
 # -----------------------------
 # UTILS
 # -----------------------------
