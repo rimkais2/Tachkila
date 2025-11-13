@@ -23,7 +23,13 @@ if "admin_authenticated" not in st.session_state:
 # -----------------------------
 # CONFIG
 # -----------------------------
-st.set_page_config(page_title="Tachkila Mouchkila", page_icon="⚽", layout="wide")
+st.set_page_config(
+    page_title="Tachkila Mouchkila",
+    page_icon="⚽",
+    layout="wide",
+    initial_sidebar_state="expanded",  # 👉 sidebar ouverte par défaut
+)
+
 
 # Secrets attendus :
 # - ADMIN_PASSWORD (facultatif, "changeme" si absent)
