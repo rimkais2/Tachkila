@@ -61,7 +61,9 @@ matches = Table(
     Column("kickoff_paris", String, nullable=False),  # "YYYY-MM-DD HH:MM" heure de Paris
     Column("final_home", Integer, nullable=True),
     Column("final_away", Integer, nullable=True),
+    Column("category", String, nullable=True),  # 👉 nouvelle colonne
 )
+
 
 predictions = Table(
     "predictions", meta,
@@ -75,18 +77,15 @@ predictions = Table(
 )
 
 with engine.begin() as conn:
-    meta.create_all(conn)
-
-    # Migration légère (SQLite) : ajout colonne is_game_master si manquante
     try:
-        info = conn.exec_driver_sql("PRAGMA table_info(users)").fetchall()
+        info = conn.exec_driver_sql("PRAGMA table_info(matches)").fetchall()
         existing_cols = [c[1] for c in info]
-        if "is_game_master" not in existing_cols:
+        if "category" not in existing_cols:
             conn.exec_driver_sql(
-                "ALTER TABLE users ADD COLUMN is_game_master INTEGER NOT NULL DEFAULT 0"
+                "ALTER TABLE matches ADD COLUMN category TEXT"
             )
     except Exception:
-        # Si ce n'est pas SQLite ou si la colonne existe déjà, on ignore
+        # Si pas SQLite, on ignore silencieusement
         pass
 
 
@@ -176,9 +175,15 @@ def upsert_prediction(user_id: str, match_id: str, ph: int, pa: int):
             )
     st.cache_data.clear()
 
-def add_match(home: str, away: str, kickoff_paris: str):
-    """Ajoute un match. kickoff_paris est une string 'YYYY-MM-DD HH:MM' heure de Paris."""
+def add_match(home: str, away: str, kickoff_paris: str, category: str | None = None):
+    """Ajoute un match. kickoff_paris = 'YYYY-MM-DD HH:MM' heure de Paris."""
     _ = datetime.strptime(kickoff_paris, "%Y-%m-%d %H:%M")  # validation simple
+
+    if category is not None:
+        category = category.strip()
+        if category == "":
+            category = None
+
     with engine.begin() as conn:
         conn.execute(insert(matches).values(
             match_id=str(uuid.uuid4()),
@@ -187,8 +192,10 @@ def add_match(home: str, away: str, kickoff_paris: str):
             kickoff_paris=kickoff_paris.strip(),
             final_home=None,
             final_away=None,
+            category=category,
         ))
     st.cache_data.clear()
+
 
 def set_final_score(match_id: str, fh: int, fa: int):
     with engine.begin() as conn:
@@ -611,60 +618,91 @@ if tab_maitre is not None:
             # ONGLET 1 : AJOUTER UN MATCH
             # =====================================================
             with tab_ajout:
-                st.markdown("### ➕ Ajouter un match")
+    st.markdown("### ➕ Ajouter un match")
 
-                with st.form("form_add_match"):
-                    c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
+    # Charger les catégories existantes
+    df_users_cat, df_matches_cat, _ = load_df()
+    existing_categories: list[str] = []
+    if "category" in df_matches_cat.columns:
+        existing_categories = sorted(
+            [
+                str(c).strip()
+                for c in df_matches_cat["category"].dropna().unique()
+                if str(c).strip() != ""
+            ]
+        )
 
-                    # Sélection équipe domicile
-                    with c1:
-                        home = st.selectbox(
-                            "Équipe domicile",
-                            options=catalog["name"].sort_values(),
-                            index=None,
-                            placeholder="Choisir une équipe..."
-                        )
-                        if home:
-                            logo = logo_for(home)
-                            if logo:
-                                st.image(logo, width=64, caption=home)
+    # Options du selectbox
+    options = ["(Aucune catégorie)"]
+    if existing_categories:
+        options += existing_categories
+    options.append("➕ Nouvelle catégorie...")
 
-                    # Sélection équipe extérieur
-                    with c2:
-                        away = st.selectbox(
-                            "Équipe extérieur",
-                            options=catalog["name"].sort_values(),
-                            index=None,
-                            placeholder="Choisir une équipe..."
-                        )
-                        if away:
-                            logo = logo_for(away)
-                            if logo:
-                                st.image(logo, width=64, caption=away)
+    cat_choice = st.selectbox("Catégorie du match (optionnel)", options)
+    new_cat = ""
+    if cat_choice == "➕ Nouvelle catégorie...":
+        new_cat = st.text_input("Nouvelle catégorie", placeholder="Ex : Poules, Quart de finale, Match amical...")
 
-                    # Date + heure
-                    with c3:
-                        col_date, col_time = st.columns(2)
-                        with col_date:
-                            date_match = st.date_input("📅 Date du match")
-                        with col_time:
-                            heure_match = st.time_input("⏰ Heure du match")
-                        kickoff_dt = datetime.combine(date_match, heure_match)
-                        kickoff = kickoff_dt.strftime("%Y-%m-%d %H:%M")
+    with st.form("form_add_match"):
+        c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
 
-                    # Bouton submit
-                    with c4:
-                        submit = st.form_submit_button("Ajouter")
+        with c1:
+            home = st.selectbox(
+                "Équipe domicile",
+                options=catalog["name"].sort_values(),
+                index=None,
+                placeholder="Choisir une équipe..."
+            )
+            if home:
+                logo = logo_for(home)
+                if logo:
+                    st.image(logo, width=64, caption=home)
 
-                    if submit:
-                        if not home or not away:
-                            st.warning("Sélectionne les deux équipes.")
-                        elif home == away:
-                            st.warning("L'équipe domicile et l'équipe extérieur doivent être différentes.")
-                        else:
-                            add_match(home, away, kickoff)
-                            st.success(f"Match ajouté ✅ ({home} vs {away} — {kickoff})")
-                            st.rerun()
+        with c2:
+            away = st.selectbox(
+                "Équipe extérieur",
+                options=catalog["name"].sort_values(),
+                index=None,
+                placeholder="Choisir une équipe..."
+            )
+            if away:
+                logo = logo_for(away)
+                if logo:
+                    st.image(logo, width=64, caption=away)
+
+        with c3:
+            col_date, col_time = st.columns(2)
+            with col_date:
+                date_match = st.date_input("📅 Date du match")
+            with col_time:
+                heure_match = st.time_input("⏰ Heure du match")
+            kickoff_dt = datetime.combine(date_match, heure_match)
+            kickoff = kickoff_dt.strftime("%Y-%m-%d %H:%M")
+
+        with c4:
+            submit = st.form_submit_button("Ajouter")
+
+        if submit:
+            if not home or not away:
+                st.warning("Sélectionne les deux équipes.")
+            elif home == away:
+                st.warning("L'équipe domicile et l'équipe extérieur doivent être différentes.")
+            else:
+                # Déterminer la catégorie finale
+                if new_cat.strip():
+                    category = new_cat.strip()
+                elif cat_choice not in ["(Aucune catégorie)", "➕ Nouvelle catégorie..."]:
+                    category = cat_choice
+                else:
+                    category = None
+
+                add_match(home, away, kickoff, category)
+                if category:
+                    st.success(f"Match ajouté ✅ ({home} vs {away} — {kickoff}, catégorie : {category})")
+                else:
+                    st.success(f"Match ajouté ✅ ({home} vs {away} — {kickoff})")
+                st.rerun()
+
 
             # =====================================================
             # ONGLET 2 : RÉSULTATS
