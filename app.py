@@ -422,10 +422,14 @@ with tab_pronos:
                 with l2:
                     st.markdown(f"**{m['home']} vs {m['away']}**")
                     st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
+                    # 👉 Affichage de la catégorie si disponible
+                    if "category" in m.index and pd.notna(m["category"]):
+                        st.caption(f"Catégorie : {m['category']}")
                 with l3:
                     lg_away = logo_for(m["away"])
                     if lg_away:
                         st.image(lg_away, width=40)
+
 
             existing = my_preds[my_preds["match_id"] == m["match_id"]]
             ph0 = int(existing.iloc[0]["ph"]) if not existing.empty else 0
@@ -709,7 +713,7 @@ if tab_maitre is not None:
             # =====================================================
             with tab_resultats:
                 st.markdown("### 📝 Saisie et modification des résultats")
-
+            
                 df_users3, df_matches3, _ = load_df()
                 if df_matches3.empty:
                     st.info("Aucun match pour le moment.")
@@ -721,22 +725,25 @@ if tab_maitre is not None:
                         )
                     except Exception:
                         df_matches3["_ko"] = pd.NaT
-
+            
                     df_matches3 = df_matches3.sort_values(
                         "_ko", ascending=False, na_position="last"
                     ).drop(columns=["_ko"])
-
+            
                     for _, m in df_matches3.iterrows():
                         match_id = m["match_id"]
-
+            
                         with st.expander(f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"):
                             c1, c2 = st.columns([3, 2])
-
+            
                             # Infos générales + logos
                             with c1:
                                 st.markdown(f"**{m['home']} vs {m['away']}**")
                                 st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
-
+                                # 👉 Affichage de la catégorie si disponible
+                                if "category" in m.index and pd.notna(m["category"]):
+                                    st.caption(f"Catégorie : {m['category']}")
+            
                                 lc1, lc2 = st.columns(2)
                                 with lc1:
                                     lg_home = logo_for(m["home"])
@@ -746,7 +753,7 @@ if tab_maitre is not None:
                                     lg_away = logo_for(m["away"])
                                     if lg_away:
                                         st.image(lg_away, width=48, caption=m["away"])
-
+            
                             # Score actuel
                             with c2:
                                 if pd.notna(m["final_home"]) and pd.notna(m["final_away"]):
@@ -755,15 +762,15 @@ if tab_maitre is not None:
                                     )
                                 else:
                                     st.markdown("**Score final actuel :** non saisi")
-
+            
                             st.markdown("---")
-
+            
                             # Zone de saisie du score + actions
                             c3, c4, c5 = st.columns([2, 2, 2])
-
+            
                             default_fh = int(m["final_home"]) if pd.notna(m["final_home"]) else 0
                             default_fa = int(m["final_away"]) if pd.notna(m["final_away"]) else 0
-
+            
                             with c3:
                                 new_fh = st.number_input(
                                     f"Score {m['home']}",
@@ -782,13 +789,13 @@ if tab_maitre is not None:
                                     value=default_fa,
                                     key=f"fa_admin_{match_id}"
                                 )
-
+            
                             with c5:
                                 if st.button("💾 Sauvegarder le score", key=f"save_score_{match_id}"):
                                     set_final_score(match_id, new_fh, new_fa)
                                     st.success("Score final mis à jour ✅ (le classement sera recalculé)")
                                     st.rerun()
-
+            
                                 if st.button("🗑️ Supprimer ce match", key=f"delete_match_{match_id}"):
                                     delete_match_and_predictions(match_id)
                                     st.warning("Match supprimé avec ses pronostics associés 🗑️")
@@ -838,10 +845,11 @@ if tab_maitre is not None:
                             c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
 
                             # Infos match
-                            with c1:
+                           with c1:
                                 st.markdown(f"**{m['home']} vs {m['away']}**")
                                 st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
-
+                                if "category" in m.index and pd.notna(m["category"]):
+                                    st.caption(f"Catégorie : {m['category']}")
                             # Prono existant
                             existing = preds_cible[preds_cible["match_id"] == m["match_id"]]
                             ph0 = int(existing.iloc[0]["ph"]) if not existing.empty else 0
