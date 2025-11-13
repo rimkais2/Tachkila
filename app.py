@@ -294,13 +294,13 @@ with st.sidebar:
         pin_input = st.text_input("Code à 4 chiffres", type="password", max_chars=4)
 
        if st.button("Se connecter"):
-            user = authenticate_player(name_input, pin_input)
-            if user is None:
-                st.error("Nom ou code incorrect (demande à l'admin de vérifier ton code).")
-            else:
-                st.session_state["player"] = dict(user)
-                st.session_state["collapse_sidebar"] = True   # 👈 replie la sidebar
-                st.rerun()
+        user = authenticate_player(name_input, pin_input)
+        if user is None:
+            st.error("Nom ou code incorrect (demande à l'admin de vérifier ton code).")
+        else:
+            st.session_state["player"] = dict(user)
+            st.session_state["collapse_sidebar"] = True   # 👈 replie la sidebar
+            st.rerun()
 
     else:
         player = st.session_state["player"]
