@@ -474,6 +474,20 @@ def logo_for(team_name):
     except Exception:
         return None
     return None
+    
+import locale
+locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")  # active le français
+
+def format_kickoff(paris_str: str) -> str:
+    """
+    Transforme 'YYYY-MM-DD HH:MM' → 'Mer 11 déc 2002 — 20:45'
+    (format court FR)
+    """
+    try:
+        dt = datetime.strptime(paris_str, "%Y-%m-%d %H:%M")
+        return dt.strftime("%a %d %b %Y — %H:%M").capitalize()
+    except:
+        return paris_str
 
 
 # -----------------------------
@@ -680,7 +694,8 @@ with tab_pronos:
                                 st.image(lg_home, width=40)
                         with l2:
                             st.markdown(f"**{m['home']} vs {m['away']}**")
-                            st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
+                            st.caption(f"Coup d’envoi : {format_kickoff(m['kickoff_paris'])}")
+
                             if "category" in m.index and pd.notna(m["category"]):
                                 st.caption(f"Catégorie : {m['category']}")
                         with l3:
@@ -748,7 +763,8 @@ with tab_pronos:
                                 st.image(lg_home, width=40)
                         with l2:
                             st.markdown(f"**{m['home']} vs {m['away']}**")
-                            st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
+                            st.caption(f"Coup d’envoi : {format_kickoff(m['kickoff_paris'])}")
+
                             if "category" in m.index and pd.notna(m["category"]):
                                 st.caption(f"Catégorie : {m['category']}")
                         with l3:
@@ -1057,7 +1073,8 @@ if tab_maitre is not None:
 
                             with c1:
                                 st.markdown(f"**{m['home']} vs {m['away']}**")
-                                st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
+                                st.caption(f"Coup d’envoi : {format_kickoff(m['kickoff_paris'])}")
+
                                 if "category" in m.index and pd.notna(m["category"]):
                                     st.caption(f"Catégorie : {m['category']}")
 
@@ -1157,7 +1174,8 @@ if tab_maitre is not None:
 
                             with c1:
                                 st.markdown(f"**{m['home']} vs {m['away']}**")
-                                st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
+                                st.caption(f"Coup d’envoi : {format_kickoff(m['kickoff_paris'])}")
+
                                 if "category" in m.index and pd.notna(m["category"]):
                                     st.caption(f"Catégorie : {m['category']}")
 
