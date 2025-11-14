@@ -684,7 +684,7 @@ with tab_pronos:
             st.caption("Aucun match en cours pour le moment.")
         else:
             for _, m in df_en_cours.iterrows():
-                exp_label = f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"
+                exp_label = f"{m['home']} vs {m['away']} — {format_kickoff(m['kickoff_paris'])}"
                 with st.expander(exp_label):
                     c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
 
@@ -753,7 +753,7 @@ with tab_pronos:
             st.caption("Aucun match terminé pour le moment.")
         else:
             for _, m in df_termines.iterrows():
-                exp_label = f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"
+                exp_label = f"{m['home']} vs {m['away']} — {format_kickoff(m['kickoff_paris'])}"
                 with st.expander(exp_label):
                     c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
 
@@ -1071,7 +1071,9 @@ if tab_maitre is not None:
                     for _, m in df_matches3.iterrows():
                         match_id = m["match_id"]
 
-                        with st.expander(f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"):
+                        with st.expander(
+                            f"{m['home']} vs {m['away']} — {format_kickoff(m['kickoff_paris'])}"
+                        ):
                             c1, c2 = st.columns([3, 2])
 
                             with c1:
