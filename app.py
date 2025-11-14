@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 import base64
 from pathlib import Path
@@ -928,52 +928,89 @@ with tab_classement:
                 )
 
             with st.expander("Détail par match"):
-                # On garde timestamp_utc pour voir si ça a été modifié après le coup d’envoi
-                show = merged[
-                    [
-                        "display_name",
-                        "home", "away",
-                        "ph", "pa",
-                        "final_home", "final_away",
-                        "points",
-                        "kickoff_paris",
-                        "timestamp_utc",
-                    ]
-                ].copy()
+                detail = merged.copy()
             
-                # Colonne booléenne : modifié après coup d’envoi ?
-                show["modif_apres_ko"] = show.apply(
-                    lambda r: edited_after_kickoff(r["timestamp_utc"], r["kickoff_paris"]),
-                    axis=1,
-                )
+                # Date du match en datetime pour filtrer sur les 7 derniers jours
+                try:
+                    detail["_ko"] = pd.to_datetime(
+                        detail["kickoff_paris"], format="%Y-%m-%d %H:%M", errors="coerce"
+                    )
+                except Exception:
+                    detail["_ko"] = pd.to_datetime(detail["kickoff_paris"], errors="coerce")
             
-                show = show.rename(
-                    columns={
-                        "display_name": "Joueur",
-                        "home": "Domicile",
-                        "away": "Extérieur",
-                        "ph": "Prono D",
-                        "pa": "Prono E",
-                        "final_home": "Final D",
-                        "final_away": "Final E",
-                        "points": "Pts",
-                        "kickoff_paris": "Coup d’envoi",
-                        "modif_apres_ko": "Modif après KO",
-                    }
-                )
+                # Filtre : uniquement les matchs des 7 derniers jours (heure de Paris)
+                today_paris = now_paris().date()
+                min_date = today_paris - timedelta(days=7)
+                detail = detail[detail["_ko"].dt.date >= min_date]
             
-                # Beau format pour la date
-                show["Coup d’envoi"] = show["Coup d’envoi"].apply(format_kickoff)
+                if detail.empty:
+                    st.caption("Aucun match sur les 7 derniers jours.")
+                else:
+                    # Label lisible pour chaque match
+                    detail["match_label"] = detail.apply(
+                        lambda r: f"{r['home']} vs {r['away']} — {format_kickoff(r['kickoff_paris'])}",
+                        axis=1
+                    )
             
-                # Texte explicite dans la colonne
-                show["Modif après KO"] = show["Modif après KO"].map(
-                    lambda v: "⚠️ Oui (maître du jeu)" if v else ""
-                )
+                    # 🔍 Choix du type de filtre
+                    filtre = st.radio("Filtrer par :", ["Aucun", "Match", "Joueur"], horizontal=True)
             
-                # On n'affiche plus timestamp_utc brut
-                show = show.drop(columns=["timestamp_utc"])
+                    if filtre == "Match":
+                        matchs_disp = sorted(detail["match_label"].unique())
+                        match_sel = st.selectbox("Choisir un match", matchs_disp)
+                        detail = detail[detail["match_label"] == match_sel]
             
-                st.dataframe(show, use_container_width=True)
+                    elif filtre == "Joueur":
+                        joueurs_disp = sorted(detail["display_name"].unique())
+                        joueur_sel = st.selectbox("Choisir un joueur", joueurs_disp)
+                        detail = detail[detail["display_name"] == joueur_sel]
+            
+                    # Construction du tableau final
+                    show = detail[
+                        [
+                            "display_name",
+                            "match_label",
+                            "ph", "pa",
+                            "final_home", "final_away",
+                            "points",
+                            "kickoff_paris",
+                            "timestamp_utc",
+                        ]
+                    ].copy()
+            
+                    # ⚠️ Colonne emoji si saisi/modifié après KO
+                    show["⚠️"] = show.apply(
+                        lambda r: "⚠️" if edited_after_kickoff(r["timestamp_utc"], r["kickoff_paris"]) else "",
+                        axis=1,
+                    )
+            
+                    # Renommage colonnes
+                    show = show.rename(
+                        columns={
+                            "display_name": "Joueur",
+                            "match_label": "Match",
+                            "ph": "Prono D",
+                            "pa": "Prono E",
+                            "final_home": "Final D",
+                            "final_away": "Final E",
+                            "points": "Pts",
+                            "kickoff_paris": "Coup d’envoi",
+                        }
+                    )
+            
+                    # Beau format pour la date
+                    show["Coup d’envoi"] = show["Coup d’envoi"].apply(format_kickoff)
+            
+                    # On n’affiche plus la colonne interne de timestamp
+                    show = show.drop(columns=["timestamp_utc"])
+            
+                    # 🧾 DataFrame sans index, avec colonne emoji très étroite
+                    st.dataframe(
+                        show[["⚠️", "Joueur", "Match", "Prono D", "Prono E", "Final D", "Final E", "Pts"]],
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+
 
 
 # -----------------------------
