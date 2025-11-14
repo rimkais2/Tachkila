@@ -475,19 +475,22 @@ def logo_for(team_name):
         return None
     return None
     
-import locale
-locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")  # active le français
+DAY_ABBR = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+MONTH_ABBR = ["jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "déc"]
 
 def format_kickoff(paris_str: str) -> str:
     """
-    Transforme 'YYYY-MM-DD HH:MM' → 'Mer 11 déc 2002 — 20:45'
-    (format court FR)
+    'YYYY-MM-DD HH:MM' → 'Ven 14 nov 2025 — 20:45'
     """
     try:
         dt = datetime.strptime(paris_str, "%Y-%m-%d %H:%M")
-        return dt.strftime("%a %d %b %Y — %H:%M").capitalize()
-    except:
+    except Exception:
         return paris_str
+
+    jour = DAY_ABBR[dt.weekday()]       # 0 = Lundi
+    mois = MONTH_ABBR[dt.month - 1]     # 1 = janvier
+    return f"{jour} {dt.day:02d} {mois} {dt.year} — {dt:%H:%M}"
+
 
 
 # -----------------------------
