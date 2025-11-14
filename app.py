@@ -491,7 +491,20 @@ def format_kickoff(paris_str: str) -> str:
     mois = MONTH_ABBR[dt.month - 1]     # 1 = janvier
     return f"{jour} {dt.day:02d} {mois} {dt.year} — {dt:%H:%M}"
 
+def edited_after_kickoff(timestamp_utc_str: str, kickoff_paris_str: str) -> bool:
+    """
+    True si le prono a été enregistré APRÈS le coup d’envoi (en heure de Paris).
+    Donc forcément via le maître de jeu.
+    """
+    try:
+        ts_utc = datetime.strptime(timestamp_utc_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        ts_paris = ts_utc.astimezone(ZoneInfo("Europe/Paris"))
 
+        ko_paris = datetime.strptime(kickoff_paris_str, "%Y-%m-%d %H:%M").replace(tzinfo=ZoneInfo("Europe/Paris"))
+
+        return ts_paris > ko_paris
+    except Exception:
+        return False
 
 # -----------------------------
 # UI - HEADER + SIDEBAR
@@ -915,6 +928,7 @@ with tab_classement:
                 )
 
             with st.expander("Détail par match"):
+                # On garde timestamp_utc pour voir si ça a été modifié après le coup d’envoi
                 show = merged[
                     [
                         "display_name",
@@ -923,9 +937,16 @@ with tab_classement:
                         "final_home", "final_away",
                         "points",
                         "kickoff_paris",
+                        "timestamp_utc",
                     ]
                 ].copy()
-
+            
+                # Colonne booléenne : modifié après coup d’envoi ?
+                show["modif_apres_ko"] = show.apply(
+                    lambda r: edited_after_kickoff(r["timestamp_utc"], r["kickoff_paris"]),
+                    axis=1,
+                )
+            
                 show = show.rename(
                     columns={
                         "display_name": "Joueur",
@@ -937,10 +958,23 @@ with tab_classement:
                         "final_away": "Final E",
                         "points": "Pts",
                         "kickoff_paris": "Coup d’envoi",
+                        "modif_apres_ko": "Modif après KO",
                     }
                 )
-
+            
+                # Beau format pour la date
+                show["Coup d’envoi"] = show["Coup d’envoi"].apply(format_kickoff)
+            
+                # Texte explicite dans la colonne
+                show["Modif après KO"] = show["Modif après KO"].map(
+                    lambda v: "⚠️ Oui (maître du jeu)" if v else ""
+                )
+            
+                # On n'affiche plus timestamp_utc brut
+                show = show.drop(columns=["timestamp_utc"])
+            
                 st.dataframe(show, use_container_width=True)
+
 
 # -----------------------------
 # TAB MAÎTRE DE JEU
