@@ -628,82 +628,171 @@ with tab_pronos:
     if df_matches.empty:
         st.info("Aucun match pour le moment.")
     else:
+        # Copie + parsing de la date
+        df_matches_work = df_matches.copy()
         try:
-            df_matches_sorted = df_matches.copy()
-            df_matches_sorted["_ko"] = pd.to_datetime(
-                df_matches_sorted["kickoff_paris"], format="%Y-%m-%d %H:%M"
+            df_matches_work["_ko"] = pd.to_datetime(
+                df_matches_work["kickoff_paris"], format="%Y-%m-%d %H:%M"
             )
         except Exception:
-            df_matches_sorted = df_matches.copy()
-            df_matches_sorted["_ko"] = pd.NaT
+            df_matches_work["_ko"] = pd.to_datetime(
+                df_matches_work["kickoff_paris"], errors="coerce"
+            )
 
-        df_matches_sorted = df_matches_sorted.sort_values(
+        # Match terminé = score final saisi
+        df_matches_work["res_known"] = (
+            df_matches_work["final_home"].notna()
+            & df_matches_work["final_away"].notna()
+        )
+
+        # 🕒 Matchs en cours = sans score final
+        # triés par échéance la plus proche (kickoff le plus proche en premier)
+        df_en_cours = df_matches_work[~df_matches_work["res_known"]].sort_values(
+            "_ko", ascending=True, na_position="last"
+        )
+
+        # ✅ Matchs terminés = score final saisi
+        # triés du plus récent au plus ancien
+        df_termines = df_matches_work[df_matches_work["res_known"]].sort_values(
             "_ko", ascending=False, na_position="last"
-        ).drop(columns=["_ko"])
+        )
 
         my_preds = df_preds[df_preds["user_id"] == user_id]
 
-        for _, m in df_matches_sorted.iterrows():
+        # ==========================
+        # SECTION : MATCHS EN COURS
+        # ==========================
+        st.markdown("### 🕒 Matchs en cours")
+        if df_en_cours.empty:
+            st.caption("Aucun match en cours pour le moment.")
+        else:
+            for _, m in df_en_cours.iterrows():
+                exp_label = f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"
+                with st.expander(exp_label):
+                    c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
 
-            # 🎯 En-tête pliable comme dans "Résultats"
-            exp_label = f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"
-            with st.expander(exp_label):
-                c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
+                    # Infos match + logos
+                    with c1:
+                        l1, l2, l3 = st.columns([1, 2, 1])
+                        with l1:
+                            lg_home = logo_for(m["home"])
+                            if lg_home:
+                                st.image(lg_home, width=40)
+                        with l2:
+                            st.markdown(f"**{m['home']} vs {m['away']}**")
+                            st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
+                            if "category" in m.index and pd.notna(m["category"]):
+                                st.caption(f"Catégorie : {m['category']}")
+                        with l3:
+                            lg_away = logo_for(m["away"])
+                            if lg_away:
+                                st.image(lg_away, width=40)
 
-                # Infos match + logos
-                with c1:
-                    l1, l2, l3 = st.columns([1, 2, 1])
-                    with l1:
-                        lg_home = logo_for(m["home"])
-                        if lg_home:
-                            st.image(lg_home, width=40)
-                    with l2:
-                        st.markdown(f"**{m['home']} vs {m['away']}**")
-                        st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
-                        if "category" in m.index and pd.notna(m["category"]):
-                            st.caption(f"Catégorie : {m['category']}")
-                    with l3:
-                        lg_away = logo_for(m["away"])
-                        if lg_away:
-                            st.image(lg_away, width=40)
+                    existing = my_preds[my_preds["match_id"] == m["match_id"]]
+                    ph0 = int(existing.iloc[0]["ph"]) if not existing.empty else 0
+                    pa0 = int(existing.iloc[0]["pa"]) if not existing.empty else 0
 
-                existing = my_preds[my_preds["match_id"] == m["match_id"]]
-                ph0 = int(existing.iloc[0]["ph"]) if not existing.empty else 0
-                pa0 = int(existing.iloc[0]["pa"]) if not existing.empty else 0
-
-                editable = is_editable(m["kickoff_paris"])
-                res_known = (
-                    pd.notna(m["final_home"]) and pd.notna(m["final_away"])
-                )
-
-                with c2:
-                    ph = st.number_input(
-                        f"{m['home']} (dom.)",
-                        0, 20, ph0, 1,
-                        key=f"ph_{m['match_id']}",
-                        disabled=not editable
+                    editable = is_editable(m["kickoff_paris"])
+                    res_known = (
+                        pd.notna(m["final_home"]) and pd.notna(m["final_away"])
                     )
-                with c3:
-                    pa = st.number_input(
-                        f"{m['away']} (ext.)",
-                        0, 20, pa0, 1,
-                        key=f"pa_{m['match_id']}",
-                        disabled=not editable
-                    )
-                with c4:
-                    if editable:
-                        if st.button("💾 Enregistrer", key=f"save_{m['match_id']}"):
-                            upsert_prediction(user_id, m["match_id"], ph, pa)
-                            st.success("Pronostic enregistré ✅")
-                    else:
-                        if res_known:
-                            # Match terminé : on affiche l'état + le score final
-                            st.info(
-                                f"Match terminé — score final : {int(m['final_home'])} - {int(m['final_away'])}"
-                            )
+
+                    with c2:
+                        ph = st.number_input(
+                            f"{m['home']} (dom.)",
+                            0, 20, ph0, 1,
+                            key=f"ph_{m['match_id']}",
+                            disabled=not editable
+                        )
+                    with c3:
+                        pa = st.number_input(
+                            f"{m['away']} (ext.)",
+                            0, 20, pa0, 1,
+                            key=f"pa_{m['match_id']}",
+                            disabled=not editable
+                        )
+                    with c4:
+                        if editable:
+                            if st.button("💾 Enregistrer", key=f"save_{m['match_id']}"):
+                                upsert_prediction(user_id, m["match_id"], ph, pa)
+                                st.success("Pronostic enregistré ✅")
                         else:
-                            # Match commencé mais score pas encore saisi par le maître du jeu
-                            st.info("⛔ Verrouillé (match commencé)")
+                            if res_known:
+                                st.info(
+                                    f"Match terminé — score final : "
+                                    f"{int(m['final_home'])} - {int(m['final_away'])}"
+                                )
+                            else:
+                                st.info("⛔ Verrouillé (match commencé)")
+
+        st.markdown("---")
+
+        # ==========================
+        # SECTION : MATCHS TERMINÉS
+        # ==========================
+        st.markdown("### ✅ Matchs terminés")
+        if df_termines.empty:
+            st.caption("Aucun match terminé pour le moment.")
+        else:
+            for _, m in df_termines.iterrows():
+                exp_label = f"{m['home']} vs {m['away']} — {m['kickoff_paris']}"
+                with st.expander(exp_label):
+                    c1, c2, c3, c4 = st.columns([3, 3, 3, 2])
+
+                    # Infos match + logos
+                    with c1:
+                        l1, l2, l3 = st.columns([1, 2, 1])
+                        with l1:
+                            lg_home = logo_for(m["home"])
+                            if lg_home:
+                                st.image(lg_home, width=40)
+                        with l2:
+                            st.markdown(f"**{m['home']} vs {m['away']}**")
+                            st.caption(f"Coup d’envoi : {m['kickoff_paris']} (heure de Paris)")
+                            if "category" in m.index and pd.notna(m["category"]):
+                                st.caption(f"Catégorie : {m['category']}")
+                        with l3:
+                            lg_away = logo_for(m["away"])
+                            if lg_away:
+                                st.image(lg_away, width=40)
+
+                    existing = my_preds[my_preds["match_id"] == m["match_id"]]
+                    ph0 = int(existing.iloc[0]["ph"]) if not existing.empty else 0
+                    pa0 = int(existing.iloc[0]["pa"]) if not existing.empty else 0
+
+                    # ici en théorie editable = False, mais on garde la logique
+                    editable = is_editable(m["kickoff_paris"])
+                    res_known = (
+                        pd.notna(m["final_home"]) and pd.notna(m["final_away"])
+                    )
+
+                    with c2:
+                        ph = st.number_input(
+                            f"{m['home']} (dom.)",
+                            0, 20, ph0, 1,
+                            key=f"ph_done_{m['match_id']}",
+                            disabled=not editable
+                        )
+                    with c3:
+                        pa = st.number_input(
+                            f"{m['away']} (ext.)",
+                            0, 20, pa0, 1,
+                            key=f"pa_done_{m['match_id']}",
+                            disabled=not editable
+                        )
+                    with c4:
+                        if editable:
+                            if st.button("💾 Enregistrer", key=f"save_done_{m['match_id']}"):
+                                upsert_prediction(user_id, m["match_id"], ph, pa)
+                                st.success("Pronostic enregistré ✅")
+                        else:
+                            if res_known:
+                                st.info(
+                                    f"Match terminé — score final : "
+                                    f"{int(m['final_home'])} - {int(m['final_away'])}"
+                                )
+                            else:
+                                st.info("⛔ Verrouillé (match commencé)")
 
 
 # -----------------------------
