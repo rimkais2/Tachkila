@@ -1,0 +1,85 @@
+id,name,type,country_name,country_iso2,confederation,code,logo_url
+national-dz,Algeria,national,Algeria,DZ,CAF,DZ,https://flagcdn.com/w320/dz.png
+national-ao,Angola,national,Angola,AO,CAF,AO,https://flagcdn.com/w320/ao.png
+national-bj,Benin,national,Benin,BJ,CAF,BJ,https://flagcdn.com/w320/bj.png
+national-bw,Botswana,national,Botswana,BW,CAF,BW,https://flagcdn.com/w320/bw.png
+national-bf,Burkina Faso,national,Burkina Faso,BF,CAF,BF,https://flagcdn.com/w320/bf.png
+national-bi,Burundi,national,Burundi,BI,CAF,BI,https://flagcdn.com/w320/bi.png
+national-cv,Cabo Verde,national,Cabo Verde,CV,CAF,CV,https://flagcdn.com/w320/cv.png
+national-cm,Cameroon,national,Cameroon,CM,CAF,CM,https://flagcdn.com/w320/cm.png
+national-cf,Central African Republic,national,Central African Republic,CF,CAF,CF,https://flagcdn.com/w320/cf.png
+national-td,Chad,national,Chad,TD,CAF,TD,https://flagcdn.com/w320/td.png
+national-km,Comoros,national,Comoros,KM,CAF,KM,https://flagcdn.com/w320/km.png
+national-cg,Congo,national,Congo,CG,CAF,CG,https://flagcdn.com/w320/cg.png
+national-cd,DR Congo,national,DR Congo,CD,CAF,CD,https://flagcdn.com/w320/cd.png
+national-ci,Côte d'Ivoire,national,Côte d'Ivoire,CI,CAF,CI,https://flagcdn.com/w320/ci.png
+national-dj,Djibouti,national,Djibouti,DJ,CAF,DJ,https://flagcdn.com/w320/dj.png
+national-eg,Egypt,national,Egypt,EG,CAF,EG,https://flagcdn.com/w320/eg.png
+national-gq,Equatorial Guinea,national,Equatorial Guinea,GQ,CAF,GQ,https://flagcdn.com/w320/gq.png
+national-er,Eritrea,national,Eritrea,ER,CAF,ER,https://flagcdn.com/w320/er.png
+national-sz,Eswatini,national,Eswatini,SZ,CAF,SZ,https://flagcdn.com/w320/sz.png
+national-et,Ethiopia,national,Ethiopia,ET,CAF,ET,https://flagcdn.com/w320/et.png
+national-ga,Gabon,national,Gabon,GA,CAF,GA,https://flagcdn.com/w320/ga.png
+national-gm,Gambia,national,Gambia,GM,CAF,GM,https://flagcdn.com/w320/gm.png
+national-gh,Ghana,national,Ghana,GH,CAF,GH,https://flagcdn.com/w320/gh.png
+national-gn,Guinea,national,Guinea,GN,CAF,GN,https://flagcdn.com/w320/gn.png
+national-gw,Guinea-Bissau,national,Guinea-Bissau,GW,CAF,GW,https://flagcdn.com/w320/gw.png
+national-ke,Kenya,national,Kenya,KE,CAF,KE,https://flagcdn.com/w320/ke.png
+national-ls,Lesotho,national,Lesotho,LS,CAF,LS,https://flagcdn.com/w320/ls.png
+national-lr,Liberia,national,Liberia,LR,CAF,LR,https://flagcdn.com/w320/lr.png
+national-ly,Libya,national,Libya,LY,CAF,LY,https://flagcdn.com/w320/ly.png
+national-mg,Madagascar,national,Madagascar,MG,CAF,MG,https://flagcdn.com/w320/mg.png
+national-mw,Malawi,national,Malawi,MW,CAF,MW,https://flagcdn.com/w320/mw.png
+national-ml,Mali,national,Mali,ML,CAF,ML,https://flagcdn.com/w320/ml.png
+national-mr,Mauritania,national,Mauritania,MR,CAF,MR,https://flagcdn.com/w320/mr.png
+national-mu,Mauritius,national,Mauritius,MU,CAF,MU,https://flagcdn.com/w320/mu.png
+national-ma,Morocco,national,Morocco,MA,CAF,MA,https://flagcdn.com/w320/ma.png
+national-mz,Mozambique,national,Mozambique,MZ,CAF,MZ,https://flagcdn.com/w320/mz.png
+national-na,Namibia,national,Namibia,NA,CAF,NA,https://flagcdn.com/w320/na.png
+national-ne,Niger,national,Niger,NE,CAF,NE,https://flagcdn.com/w320/ne.png
+national-ng,Nigeria,national,Nigeria,NG,CAF,NG,https://flagcdn.com/w320/ng.png
+national-rw,Rwanda,national,Rwanda,RW,CAF,RW,https://flagcdn.com/w320/rw.png
+national-st,São Tomé and Príncipe,national,São Tomé and Príncipe,ST,CAF,ST,https://flagcdn.com/w320/st.png
+national-sn,Senegal,national,Senegal,SN,CAF,SN,https://flagcdn.com/w320/sn.png
+national-sc,Seychelles,national,Seychelles,SC,CAF,SC,https://flagcdn.com/w320/sc.png
+national-sl,Sierra Leone,national,Sierra Leone,SL,CAF,SL,https://flagcdn.com/w320/sl.png
+national-so,Somalia,national,Somalia,SO,CAF,SO,https://flagcdn.com/w320/so.png
+national-za,South Africa,national,South Africa,ZA,CAF,ZA,https://flagcdn.com/w320/za.png
+national-ss,South Sudan,national,South Sudan,SS,CAF,SS,https://flagcdn.com/w320/ss.png
+national-sd,Sudan,national,Sudan,SD,CAF,SD,https://flagcdn.com/w320/sd.png
+national-tz,Tanzania,national,Tanzania,TZ,CAF,TZ,https://flagcdn.com/w320/tz.png
+national-tg,Togo,national,Togo,TG,CAF,TG,https://flagcdn.com/w320/tg.png
+national-tn,Tunisia,national,Tunisia,TN,CAF,TN,https://flagcdn.com/w320/tn.png
+national-ug,Uganda,national,Uganda,UG,CAF,UG,https://flagcdn.com/w320/ug.png
+national-zm,Zambia,national,Zambia,ZM,CAF,ZM,https://flagcdn.com/w320/zm.png
+national-zw,Zimbabwe,national,Zimbabwe,ZW,CAF,ZW,https://flagcdn.com/w320/zw.png
+club-al-ahly-eg,Al Ahly,club,Egypt,EG,CAF,AHL,
+club-zamalek-eg,Zamalek,club,Egypt,EG,CAF,ZAM,
+club-pyramids-fc-eg,Pyramids FC,club,Egypt,EG,CAF,PYRA,
+club-wydad-casablanca-ma,Wydad Casablanca,club,Morocco,MA,CAF,WAC,
+club-raja-casablanca-ma,Raja Casablanca,club,Morocco,MA,CAF,RCA,
+club-fus-rabat-ma,FUS Rabat,club,Morocco,MA,CAF,FUS,
+club-as-far-rabat-ma,AS FAR Rabat,club,Morocco,MA,CAF,FAR,
+club-esp-rance-de-tunis-tn,Espérance de Tunis,club,Tunisia,TN,CAF,EST,
+club-club-africain-tn,Club Africain,club,Tunisia,TN,CAF,CA,
+club-toile-du-sahel-tn,Étoile du Sahel,club,Tunisia,TN,CAF,ESS,
+club-usm-alger-dz,USM Alger,club,Algeria,DZ,CAF,USMA,
+club-js-kabylie-dz,JS Kabylie,club,Algeria,DZ,CAF,JSK,
+club-cr-belouizdad-dz,CR Belouizdad,club,Algeria,DZ,CAF,CRB,
+club-tp-mazembe-cd,TP Mazembe,club,DR Congo,CD,CAF,TPM,
+club-as-vita-club-cd,AS Vita Club,club,DR Congo,CD,CAF,VITA,
+club-mamelodi-sundowns-za,Mamelodi Sundowns,club,South Africa,ZA,CAF,SUN,
+club-orlando-pirates-za,Orlando Pirates,club,South Africa,ZA,CAF,PIR,
+club-kaizer-chiefs-za,Kaizer Chiefs,club,South Africa,ZA,CAF,KAI,
+club-enyimba-ng,Enyimba,club,Nigeria,NG,CAF,ENY,
+club-rivers-united-ng,Rivers United,club,Nigeria,NG,CAF,RIV,
+club-simba-sc-tz,Simba SC,club,Tanzania,TZ,CAF,SIM,
+club-young-africans-tz,Young Africans,club,Tanzania,TZ,CAF,YANGA,
+club-al-hilal-omdurman-sd,Al-Hilal Omdurman,club,Sudan,SD,CAF,HIL,
+club-al-merrikh-sd,Al-Merrikh,club,Sudan,SD,CAF,MER,
+club-asec-mimosas-ci,ASEC Mimosas,club,Côte d'Ivoire,CI,CAF,ASEC,
+club-horoya-ac-gn,Horoya AC,club,Guinea,GN,CAF,HAC,
+club-asante-kotoko-gh,Asante Kotoko,club,Ghana,GH,CAF,KOT,
+club-hearts-of-oak-gh,Hearts of Oak,club,Ghana,GH,CAF,HOO,
+club-coton-sport-cm,Coton Sport,club,Cameroon,CM,CAF,COT,
+club-primeiro-de-agosto-ao,Primeiro de Agosto,club,Angola,AO,CAF,1A,
