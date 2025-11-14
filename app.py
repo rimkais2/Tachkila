@@ -956,7 +956,14 @@ with tab_classement:
                     filtre = st.radio("Filtrer par :", ["Aucun", "Match", "Joueur"], horizontal=True)
             
                     if filtre == "Match":
-                        matchs_disp = sorted(detail["match_label"].unique())
+                        # Matchs triés du plus récent au plus ancien
+                        df_match_opts = (
+                            detail.groupby("match_label")["_ko"]
+                            .max()
+                            .reset_index()
+                            .sort_values("_ko", ascending=False)
+                        )
+                        matchs_disp = df_match_opts["match_label"].tolist()
                         match_sel = st.selectbox("Choisir un match", matchs_disp)
                         detail = detail[detail["match_label"] == match_sel]
             
@@ -1001,15 +1008,18 @@ with tab_classement:
                     # Beau format pour la date
                     show["Coup d’envoi"] = show["Coup d’envoi"].apply(format_kickoff)
             
-                    # On n’affiche plus la colonne interne de timestamp
+                    # On n'affiche plus la colonne interne de timestamp
                     show = show.drop(columns=["timestamp_utc"])
             
-                    # 🧾 DataFrame sans index, avec colonne emoji très étroite
+                    # 🔚 colonne ⚠️ en dernier
+                    cols_order = ["Joueur", "Match", "Prono D", "Prono E", "Final D", "Final E", "Pts", "⚠️"]
+            
                     st.dataframe(
-                        show[["⚠️", "Joueur", "Match", "Prono D", "Prono E", "Final D", "Final E", "Pts"]],
+                        show[cols_order],
                         use_container_width=True,
                         hide_index=True,
                     )
+
 
 
 
